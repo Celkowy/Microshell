@@ -155,15 +155,16 @@ int main()
                 //help z pogrubieniem i zmianami koloru
                 else if (strcmp(args[0], "help") == 0)
                 {
+                        printf(matrix bold "Autor: \n");
                         printf(lightRed bold "Imię: ");
                         printf(reset);
                         printf(cyan "Mikołaj\n");
                         printf(red bold "Nazwisko: ");
                         printf(reset);
                         printf(lightYellow "Celka\n");
-                        printf(red bold "Funkcjonalności: ");
+                        printf(red bold "Funkcjonalności:\n");
                         printf(reset);
-                        printf(lightMagenta "znak zachęty, cd, exit, help, bład przy niepoprawnych komendach");
+                        printf(lightMagenta "1: Znak zachęty\n2: Ścieżka do bieżącego katalogu roboczego\n3: Obsługa polecenia cd\n4: Obsługa polecenia exit\n5: Obsługa polecania help\n6: Obsługa dodatkowych poleceń *mkdir, rmdir, clear*\n7: Wypisywanie komunikatu *unknown command* gdy niemożliwym jest poprawne zinte-   rpretowanie polecenia\n8: Bajery:\n8.1 - wyświetlanie loginu aktualnie zalogowanego użytkownika\n8.2 - kolory\n8.3 - pogrubianie czcionki\n8.4 - wyświetlanie komendy o błędzie gdy chcemy:\n8.4.1 - usunąć nieistniejący katalog oraz katalog który ma zawartość\n8.4.2 - utworzyć istniejący katalog\n8.4.3 - przejść do nieistniejącego katalogu");
                         printf(white "\n");
                 }
 
