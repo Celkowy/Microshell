@@ -137,7 +137,6 @@ int main()
                         exit(EXIT_SUCCESS);
                 }
 
-                //
                 if (strcmp(arg[0], "cd") != 0 && (strcmp(arg[0], "help") != 0) && (strcmp(arg[0], "mkdir") != 0) && (strcmp(arg[0], "clear") != 0) && (strcmp(arg[0], "exit") != 0) && (strcmp(arg[0], "rmdir") != 0))
                 {
                         int pid = fork();
@@ -154,8 +153,8 @@ int main()
                                 wypiszKolorem("unknown command ", red);
                                 printf("'%s'\n", arg[0]);
                         }
-                        //zwalnianie zasobów
                         else
+                                //zwalnianie zasobów
                                 waitpid(pid, NULL, 0);
                 }
         }
