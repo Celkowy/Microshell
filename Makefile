@@ -1,5 +1,8 @@
-microshell: microshell.c
-        gcc -o main microshell.c
+CC=clang
+CFLAGS=-WALL -g
+
+microshell:
+	gcc microshell.c -o microshell
+
 clean:
-	rm main
-              
+	rm -f microshell microshell.o

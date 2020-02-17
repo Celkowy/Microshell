@@ -8,7 +8,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define MAX_ARGS 64
+//deklaracja mojej biblioteki
+#include "libr.h"
+
+#define MAX_arg 64
 #define max 128
 
 //kolory
@@ -30,6 +33,8 @@
 #define white "\x1b[97m"
 #define redB "\x1b[41m"
 #define yellowB "\x1b[43m"
+
+//domyślne tło
 #define defaultB "\x1b[49m"
 
 //pogrubienie tekstu
@@ -37,13 +42,6 @@
 
 //default tekst
 #define reset "\x1b[0m"
-
-//funkcja do zmiany koloru, przyjmuje zmienną oraz kolor
-void wypiszKolorem(char *str, char *color)
-{
-        printf("%s%s", color, str);
-        printf(white);
-}
 
 int main()
 {
@@ -68,13 +66,13 @@ int main()
                 //czytanie wejścia z kosoli
                 size_t bytes_read = getline(&input, &n, stdin);
 
-                //rozdziela input po spacjach na pojedyńcze segmenty w args[i]
-                char *args[max + 1] = {strtok(input, " "), 0};
+                //rozdziela input po spacjach na pojedyńcze segmenty w arg[i]
+                char *arg[max + 1] = {strtok(input, " "), 0};
                 char *pointer;
                 int i = 1;
                 while (pointer = strtok(NULL, " "))
                 {
-                        args[i] = pointer;
+                        arg[i] = pointer;
                         i++;
                 }
 
@@ -82,78 +80,8 @@ int main()
                 if (input[bytes_read - 1] == '\n')
                         input[bytes_read - 1] = 0;
 
-                if (strcmp(args[0], "cd") == 0)
-                {
-                        int w = chdir(args[1]);
-                        if (w)
-                                wypiszKolorem("Can't change directory\n", red);
-                }
-
-                //exec
-                /* Jak to działa?
-                1. wyłuskuję pierwsza wartość 
-                */
-                else if (strcmp(args[0], "exec") == 0)
-                {
-                        char *path;
-                        path = (char *)malloc(n * sizeof(char));
-                        path = getenv("PATH");
-                        char *paths[max + 1] = {strtok(path, ":"), 0};
-                        char *wsk;
-                        int k = 1;
-                        while (wsk = strtok(NULL, ":"))
-                        {
-                                // printf("%s\n", paths[k]);
-                                paths[k] = wsk;
-                                k++;
-                        }
-                        int n = 0;
-                        for (int n; n < k; n++)
-                        {
-                                struct stat file;
-                                char *filepath = strcat(paths[n], strcat("/", args[1]));
-                                // printf("%s\n", filepath);
-                                if (stat(filepath, &file) != -1 && file.st_mode & S_IFREG)
-                                {
-                                        // printf(filepath);
-                                        char *xd[] = {args[2]};
-                                        execvp(filepath, xd);
-                                        break;
-                                }
-                        }
-                        //wypiszKolorem("Incorrect command\n", red);
-                }
-
-                //exit
-                else if (strcmp(args[0], "exit") == 0)
-                {
-                        break;
-                }
-
-                //mkdir
-                else if (strcmp(args[0], "mkdir") == 0)
-                {
-                        int w = mkdir(args[1], 0777);
-                        if (w)
-                                wypiszKolorem("Can't create directory\n", red);
-                }
-
-                //rmdir
-                else if (strcmp(args[0], "rmdir") == 0)
-                {
-                        int w = rmdir(args[1]);
-                        if (w)
-                                wypiszKolorem("Can't remove directory\n", red);
-                }
-
-                //clear
-                else if (strcmp(args[0], "clear") == 0)
-                {
-                        system("clear");
-                }
-
                 //help z pogrubieniem i zmianami koloru
-                else if (strcmp(args[0], "help") == 0)
+                if (strcmp(arg[0], "help") == 0)
                 {
                         printf(matrix bold "Autor: \n");
                         printf(lightRed bold "Imię: ");
@@ -168,11 +96,67 @@ int main()
                         printf(white "\n");
                 }
 
-                //w razie podania nieinstniejącej komendy wyskakuje powiadomiwnie "nieznana komenda"
-                else
+                //cd
+                if (strcmp(arg[0], "cd") == 0)
                 {
-                        wypiszKolorem("unknown command ", red);
-                        printf("'%s'\n", args[0]);
+                        int w = chdir(arg[1]);
+                        if (w == -1)
+                        {
+                                wypiszKolorem("Can't change directory. ", red);
+                                printf(red "Directory '");
+                                printf(matrix "%s", arg[1]);
+                                printf(red "' does not exit.\n");
+                        }
+                }
+
+                //mkdir
+                if (strcmp(arg[0], "mkdir") == 0)
+                {
+                        int w = mkdir(arg[1], 0777);
+                        if (w)
+                                wypiszKolorem("Can't create directory\n", red);
+                }
+
+                //rmdir
+                if (strcmp(arg[0], "rmdir") == 0)
+                {
+                        int w = rmdir(arg[1]);
+                        if (w)
+                                wypiszKolorem("Can't remove directory\n", red);
+                }
+
+                //clear
+                if (strcmp(arg[0], "clear") == 0)
+                {
+                        system("clear");
+                }
+
+                //exit
+                if (strcmp(arg[0], "exit") == 0)
+                {
+                        exit(EXIT_SUCCESS);
+                }
+
+                //
+                if (strcmp(arg[0], "cd") != 0 && (strcmp(arg[0], "help") != 0) && (strcmp(arg[0], "mkdir") != 0) && (strcmp(arg[0], "clear") != 0) && (strcmp(arg[0], "exit") != 0) && (strcmp(arg[0], "rmdir") != 0))
+                {
+                        int pid = fork();
+                        //oczekiwanie na dowolny proces potomny
+                        if (pid < 0)
+                        {
+                                perror("fork");
+                                exit(EXIT_FAILURE);
+                        }
+                        //oczekiwanie na każdy proces potomny którego ID grupy procesu jest równe ID grupy procesu wywołującego funkcję
+                        else if (pid == 0)
+                        {
+                                execvp(arg[0], arg);
+                                wypiszKolorem("unknown command ", red);
+                                printf("'%s'\n", arg[0]);
+                        }
+                        //zwalnianie zasobów
+                        else
+                                waitpid(pid, NULL, 0);
                 }
         }
         exit(EXIT_SUCCESS);
